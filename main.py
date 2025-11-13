@@ -1,4 +1,7 @@
 import pygame
+from sys import exit
+
+#https://www.youtube.com/watch?v=AY9MnQ4x3zk
 
 class ChessPiece:
     imageFilePath = ""
@@ -41,13 +44,38 @@ for i in range(8):
     chessBoard[1][i] = Pawn((i, 1), "white")
     chessBoard[6][i] = Pawn((i, 6), "black")
 
+
+
+
+
+
+
+
 pygame.init()
-screen = pygame.display.set_mode((800, 400))
+
+width = 800
+height = 800
+
+
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Chess Game")
+clock = pygame.time.Clock()
+
+
+background = [[pygame.Surface((width/8, height/8)) for _ in range(8)] for _ in range(8)]
+for row in range(8):
+    for col in range(8):
+        color = (235, 235, 208) if (row + col) % 2 == 0 else (119, 148, 85)
+        background[row][col].fill(color)
+        screen.blit(background[row][col], (col * width / 8, row * height / 8))
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+
+    
     
     pygame.display.update()
+    clock.tick(30)
