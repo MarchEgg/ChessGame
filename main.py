@@ -70,8 +70,8 @@ clock = pygame.time.Clock()
 chessBoard = [[None for _ in range(8)] for _ in range(8)]
 
 for i in range(8):
-    chessBoard[1][i] = Pawn((i, 1), "white")
-    chessBoard[6][i] = Pawn((i, 6), "black")
+    chessBoard[i][1] = Pawn((i, 1), "white")
+    chessBoard[i][6] = Pawn((i, 6), "black")
 
 
 
@@ -94,18 +94,18 @@ while True:
             pygame.quit()
             exit()
 
-    for row in range(8):
-        for col in range(8):
-            screen.blit(background[row][col], (col * width / 8, row * height / 8))
-            piece = chessBoard[row][col]
+    for x in range(8):
+        for y in range(8):
+            screen.blit(background[y][x], (x * width / 8, y * height / 8))
+            piece = chessBoard[x][y]
             if piece is not None:
-                screen.blit(piece.surface, (col * width / 8 + piece.surface.get_width() / 2, row * height / 8 + piece.surface.get_height() / 2))
-        
+                screen.blit(piece.surface, (x * width / 8 + piece.surface.get_width() / 2, y * height / 8 + piece.surface.get_height() / 2))
+
     if(pygame.mouse.get_pressed()[0]):
         pos = pygame.mouse.get_pos()
         oldSelect = select
         oldPiece = curPiece
-        select = (pos[1] // (height // 8), pos[0] // (width // 8))
+        select = (pos[0] // (width // 8), pos[1] // (height // 8))
         curPiece = chessBoard[select[0]][select[1]]
         time.sleep(0.2)  # Simple debounce to avoid multiple selections
         
@@ -113,10 +113,15 @@ while True:
     print("2", oldSelect)
     
     if(oldPiece is not None):
-        if((select[1], select[0]) in oldPiece.moveList):
+        if(select in oldPiece.moveList):
             chessBoard[oldSelect[0]][oldSelect[1]] = None
-            oldPiece.move((select[1], select[0]))
+            oldPiece.move(select)
             chessBoard[select[0]][select[1]] = oldPiece
+            curPiece = None
+            select = None
+            oldSelect = None
+            oldPiece = None
+        else:
             curPiece = None
             select = None
             oldSelect = None
