@@ -32,10 +32,27 @@ class Pawn(ChessPiece):
 
         if (self.color == "white" and y == 1) or (self.color == "black" and y == 6):
             self.moveList.append((x, y + 2 * direction))
-
-        self.moveList.append((x - 1, y + direction))
-        self.moveList.append((x + 1, y + direction))
         
+
+        #self.moveList.append((x - 1, y + direction))
+        #self.moveList.append((x + 1, y + direction))
+
+
+
+
+        
+        try:
+            if chessBoard[x - 1][y + direction] is not None:
+                self.moveList.append((x - 1, y + direction))
+        except IndexError:
+            pass
+        try: 
+            if chessBoard[x + 1][y + direction] is not None:
+                self.moveList.append((x + 1, y + direction))
+        except IndexError:
+            pass
+        
+
     def move(self, newPosition):
         if newPosition in self.moveList:
             self.position = newPosition
@@ -60,14 +77,15 @@ select = None
 curPiece = None
 oldSelect = None
 oldPiece = None
+turn = 0  # 0 for white's turn, 1 for black
+
+chessBoard = [[None for _ in range(8)] for _ in range(8)]
+
 
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Chess Game")
 clock = pygame.time.Clock()
 
-
-
-chessBoard = [[None for _ in range(8)] for _ in range(8)]
 
 for i in range(8):
     chessBoard[i][1] = Pawn((i, 1), "white")
@@ -99,6 +117,7 @@ while True:
             screen.blit(background[y][x], (x * width / 8, y * height / 8))
             piece = chessBoard[x][y]
             if piece is not None:
+                piece.generateMoveList()
                 screen.blit(piece.surface, (x * width / 8 + piece.surface.get_width() / 2, y * height / 8 + piece.surface.get_height() / 2))
 
     if(pygame.mouse.get_pressed()[0]):
@@ -110,17 +129,23 @@ while True:
         time.sleep(0.2)  # Simple debounce to avoid multiple selections
         
     print("1", select)
+    print("1 color", curPiece.color if curPiece is not None else None)
     print("2", oldSelect)
+    print("2 color", oldPiece.color if oldPiece is not None else None)
     
     if(oldPiece is not None):
         if(select in oldPiece.moveList):
-            chessBoard[oldSelect[0]][oldSelect[1]] = None
-            oldPiece.move(select)
-            chessBoard[select[0]][select[1]] = oldPiece
-            curPiece = None
-            select = None
-            oldSelect = None
-            oldPiece = None
+            if(turn == 0 and oldPiece.color == "white" or turn == 1 and oldPiece.color == "black"):
+                turn = 1 - turn
+                chessBoard[oldSelect[0]][oldSelect[1]] = None
+                oldPiece.move(select)
+                chessBoard[select[0]][select[1]] = oldPiece
+                curPiece = None
+                select = None
+                oldSelect = None
+                oldPiece = None
+            else:
+                print("Not your turn!")
         else:
             curPiece = None
             select = None
