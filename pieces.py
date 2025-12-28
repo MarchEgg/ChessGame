@@ -214,3 +214,38 @@ class Queen(ChessPiece):
             self.generateMoveList()
         else:
             raise ValueError("Invalid move for Queen")
+
+class King(ChessPiece):
+    imageFilePath = "images/king.png"
+    # Implementation similar to Pawn and Rook
+    def __init__(self, position, color, board):
+        self.position = position
+        self.color = color
+        self.board = board
+        self.generateMoveList()
+        self.surface = pygame.Surface((50, 50))
+        self.surface.fill((150, 75, 0))  # Placeholder for king image
+
+    def generateMoveList(self):
+        self.moveList = []
+        x, y = self.position
+
+        # One square in any direction
+        potential_moves = [
+            (x + 1, y), (x - 1, y),
+            (x, y + 1), (x, y - 1),
+            (x + 1, y + 1), (x + 1, y - 1),
+        ]
+        for move in potential_moves:
+            if 0 <= move[0] < 8 and 0 <= move[1] < 8:
+                if self.board[move[0]][move[1]] is None or self.board[move[0]][move[1]].color != self.color:
+                    self.moveList.append(move)
+        
+    def move(self, newPosition):
+        if newPosition in self.moveList:
+            self.position = newPosition
+            self.generateMoveList()
+        else:
+            raise ValueError("Invalid move for King")
+        
+    

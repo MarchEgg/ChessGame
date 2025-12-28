@@ -2,7 +2,7 @@ import pygame
 from sys import exit
 import time
 
-from pieces import Pawn, Rook, Knight, Bishop, Queen
+from pieces import Pawn, Rook, Knight, Bishop, Queen, King
 
 #https://www.youtube.com/watch?v=AY9MnQ4x3zk
 
@@ -40,8 +40,11 @@ chessBoard[1][7] = Knight((1, 7), "black", chessBoard)
 chessBoard[6][7] = Knight((6, 7), "black", chessBoard)
 chessBoard[3][0] = Queen((3, 0), "white", chessBoard)
 chessBoard[3][7] = Queen((3, 7), "black", chessBoard)
+chessBoard[4][0] = King((4, 0), "white", chessBoard)
+chessBoard[4][7] = King((4, 7), "black", chessBoard)
 
 
+# Draw chessboard background
 background = [[pygame.Surface((width/8, height/8)) for _ in range(8)] for _ in range(8)]
 for row in range(8):
     for col in range(8):
@@ -52,11 +55,13 @@ for row in range(8):
 
 
 while True:
+    # Handle events - Close game
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
 
+    # Draw chessboard and pieces
     for x in range(8):
         for y in range(8):
             screen.blit(background[y][x], (x * width / 8, y * height / 8))
@@ -65,6 +70,7 @@ while True:
                 piece.generateMoveList()
                 screen.blit(piece.surface, (x * width / 8 + piece.surface.get_width() / 2, y * height / 8 + piece.surface.get_height() / 2))
 
+    # Handle mouse clicks for selecting and moving pieces
     if(pygame.mouse.get_pressed()[0]):
         pos = pygame.mouse.get_pos()
         oldSelect = select
@@ -78,28 +84,63 @@ while True:
     print("2", oldSelect)
     print("2 color", oldPiece.color if oldPiece is not None else None)
     
-    if(oldPiece is not None):
-        if(select in oldPiece.moveList):
-            if(turn == 0 and oldPiece.color == "white" or turn == 1 and oldPiece.color == "black"):
-                turn = 1 - turn
+    if(oldPiece is not None): # check if last selected square had a piece
+        if(select in oldPiece.moveList): # check if new selected square is a valid move
+            if(turn == 0 and oldPiece.color == "white" or turn == 1 and oldPiece.color == "black"): # check if it's the correct player's turn
+                turn = 1 - turn # switch turns
+                # Make the move
+
                 chessBoard[oldSelect[0]][oldSelect[1]] = None
                 oldPiece.move(select)
                 chessBoard[select[0]][select[1]] = oldPiece
-                curPiece = None
-                select = None
-                oldSelect = None
-                oldPiece = None
+                # Reset selections
+                curPiece, select, oldSelect, oldPiece = None, None, None, None
+
+
+                #check for check mate
+                for x in range(8):
+                    for y in range(8):
+                        piece = chessBoard[x][y]
+                        if piece is not None and isinstance(piece, King):
+                            if piece.color == "white":
+                                wKingPos = piece.position
+                            else:
+                                bKingPos = piece.position
+                
+                #check if white king is in check
+                for i in range(8):
+                    for j in range(8):
+                        piece = chessBoard[i][j]
+                        if piece is not None and piece.color == "black":
+                            piece.generateMoveList()
+                            if wKingPos in piece.moveList:
+                                print("White King is in check!")
+                                
+                #check if black king is in check
+                for i in range(8):
+                    for j in range(8):
+                        piece = chessBoard[i][j]
+                        if piece is not None and piece.color == "white":
+                            piece.generateMoveList()
+                            if bKingPos in piece.moveList:
+                                print("Black King is in check!")
+
+
             else:
                 print("Not your turn!")
         else:
+            # Reset selections if move is invalid
             curPiece = None
             select = None
             oldSelect = None
             oldPiece = None
         
     if(curPiece is not None):
+        # show possible moves
         for i in curPiece.moveList:
             pygame.draw.rect(screen, (255, 0, 0), (i[0] * width / 8, i[1] * height / 8, width / 8, height / 8), 5)
+
+    
 
 
     pygame.display.update()
