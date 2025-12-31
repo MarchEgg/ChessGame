@@ -148,6 +148,7 @@ class Bishop(ChessPiece):
             if self.board[i[0]][i[1]] is not None:
                 if self.board[i[0]][i[1]].color == self.color:
                     self.moveList.remove(i)
+                
     def move(self, newPosition):
         if newPosition in self.moveList:
             self.position = newPosition
@@ -165,6 +166,7 @@ class Knight(ChessPiece):
         self.generateMoveList()
         self.surface = pygame.Surface((50, 50))
         self.surface.fill((100, 100, 0))  # Placeholder for knight image
+
     def generateMoveList(self):
         self.moveList = []
         x, y = self.position
@@ -180,6 +182,8 @@ class Knight(ChessPiece):
             if 0 <= move[0] < 8 and 0 <= move[1] < 8:
                 if self.board[move[0]][move[1]] is None or self.board[move[0]][move[1]].color != self.color:
                     self.moveList.append(move)
+        return self.moveList
+
 
     def move(self, newPosition):
         if newPosition in self.moveList:
@@ -207,6 +211,8 @@ class Queen(ChessPiece):
         bishop_like = Bishop(self.position, self.color, self.board)
         bishop_like.generateMoveList()
         self.moveList = rook_like.moveList + bishop_like.moveList
+        return self.moveList
+
     
     def move(self, newPosition):
         if newPosition in self.moveList:
@@ -240,6 +246,8 @@ class King(ChessPiece):
             if 0 <= move[0] < 8 and 0 <= move[1] < 8:
                 if self.board[move[0]][move[1]] is None or self.board[move[0]][move[1]].color != self.color:
                     self.moveList.append(move)
+
+        return self.moveList
         
     def move(self, newPosition):
         if newPosition in self.moveList:

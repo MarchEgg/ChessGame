@@ -3,6 +3,7 @@ from sys import exit
 import time
 
 from pieces import Pawn, Rook, Knight, Bishop, Queen, King
+from utils import checkAllMovesColor
 
 #https://www.youtube.com/watch?v=AY9MnQ4x3zk
 
@@ -43,6 +44,7 @@ chessBoard[3][7] = Queen((3, 7), "black", chessBoard)
 chessBoard[4][0] = King((4, 0), "white", chessBoard)
 chessBoard[4][7] = King((4, 7), "black", chessBoard)
 
+color = ["white", "black"]
 
 # Draw chessboard background
 background = [[pygame.Surface((width/8, height/8)) for _ in range(8)] for _ in range(8)]
@@ -108,6 +110,7 @@ while True:
                                 bKingPos = piece.position
                 
                 #check if white king is in check
+                
                 for i in range(8):
                     for j in range(8):
                         piece = chessBoard[i][j]
@@ -115,7 +118,44 @@ while True:
                             piece.generateMoveList()
                             if wKingPos in piece.moveList:
                                 print("White King is in check!")
+                                #see if in checkmate
+                                # 3 ways to escape checkmate: move king, block check, capture checking piece
+                                #can you capture checking piece
+                                checkingPiece = piece
+                                whiteMoves = checkAllMovesColor(chessBoard, "white")
+                                if checkingPiece.position in whiteMoves:
+                                    print("Not checkmate, can capture checking piece")
                                 
+                                #can you move king
+                                kingPiece = chessBoard[wKingPos[0]][wKingPos[1]]
+                                posMoves = kingPiece.generateMoveList()
+                                blackMoves = checkAllMovesColor(chessBoard, "black")
+                                safeMoves = [move for move in posMoves if move not in blackMoves]
+                                if len(safeMoves) > 0:
+                                    print("Not checkmate, king can move")
+                                
+                                #can you block check
+                                #only works for line pieces (rook, bishop, queen)
+                                if isinstance(checkingPiece, (Rook, Bishop, Queen)):
+                                    checkingPath = []
+                                    xDir = 1 if checkingPiece.position[0] > wKingPos[0] else -1 if checkingPiece.position[0] < wKingPos[0] else 0
+                                    yDir = 1 if checkingPiece.position[1] > wKingPos[1] else -1 if checkingPiece.position[1] < wKingPos[1] else 0
+                                    currX, currY = wKingPos[0] + xDir, wKingPos[1] + yDir
+                                    while (currX, currY) != checkingPiece.position:
+                                        checkingPath.append((currX, currY))
+                                        currX += xDir
+                                        currY += yDir
+                                    
+                                    canBlock = False
+                                    for blockPos in checkingPath:
+                                        if blockPos in whiteMoves:
+                                            canBlock = True
+                                            break
+                                    if canBlock:
+                                        print("Not checkmate, can block check")
+                                
+
+
                 #check if black king is in check
                 for i in range(8):
                     for j in range(8):
@@ -125,6 +165,7 @@ while True:
                             if bKingPos in piece.moveList:
                                 print("Black King is in check!")
 
+                curPiece, select, oldSelect, oldPiece = None, None, None, None
 
             else:
                 print("Not your turn!")
