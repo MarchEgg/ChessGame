@@ -3,7 +3,7 @@ from sys import exit
 import time
 
 from pieces import Pawn, Rook, Knight, Bishop, Queen, King
-from utils import checkAllMovesColor
+from utils import checkAllMovesColor, isKingInCheck, isCheckmate
 
 #https://www.youtube.com/watch?v=AY9MnQ4x3zk
 
@@ -39,10 +39,10 @@ chessBoard[1][0] = Knight((1, 0), "white", chessBoard)
 chessBoard[6][0] = Knight((6, 0), "white", chessBoard)
 chessBoard[1][7] = Knight((1, 7), "black", chessBoard)
 chessBoard[6][7] = Knight((6, 7), "black", chessBoard)
-chessBoard[3][0] = Queen((3, 0), "white", chessBoard)
-chessBoard[3][7] = Queen((3, 7), "black", chessBoard)
-chessBoard[4][0] = King((4, 0), "white", chessBoard)
-chessBoard[4][7] = King((4, 7), "black", chessBoard)
+chessBoard[3][0] = King((3, 0), "white", chessBoard)
+chessBoard[3][7] = King((3, 7), "black", chessBoard)
+chessBoard[4][0] = Queen((4, 0), "white", chessBoard)
+chessBoard[4][7] = Queen((4, 7), "black", chessBoard)
 
 color = ["white", "black"]
 
@@ -99,71 +99,23 @@ while True:
                 curPiece, select, oldSelect, oldPiece = None, None, None, None
 
 
-                #check for check mate
-                for x in range(8):
-                    for y in range(8):
-                        piece = chessBoard[x][y]
-                        if piece is not None and isinstance(piece, King):
-                            if piece.color == "white":
-                                wKingPos = piece.position
-                            else:
-                                bKingPos = piece.position
+                # Check if white king is in check
+                whiteInCheck, whiteCheckingPiece = isKingInCheck(chessBoard, "white")
+                if whiteInCheck:
+                    print("White King is in check!")
+                    if isCheckmate(chessBoard, "white", whiteCheckingPiece):
+                        print("WHITE IS IN CHECKMATE! Black wins!")
+                    else:
+                        print("White is in check but can escape")
                 
-                #check if white king is in check
-                
-                for i in range(8):
-                    for j in range(8):
-                        piece = chessBoard[i][j]
-                        if piece is not None and piece.color == "black":
-                            piece.generateMoveList()
-                            if wKingPos in piece.moveList:
-                                print("White King is in check!")
-                                #see if in checkmate
-                                # 3 ways to escape checkmate: move king, block check, capture checking piece
-                                #can you capture checking piece
-                                checkingPiece = piece
-                                whiteMoves = checkAllMovesColor(chessBoard, "white")
-                                if checkingPiece.position in whiteMoves:
-                                    print("Not checkmate, can capture checking piece")
-                                
-                                #can you move king
-                                kingPiece = chessBoard[wKingPos[0]][wKingPos[1]]
-                                posMoves = kingPiece.generateMoveList()
-                                blackMoves = checkAllMovesColor(chessBoard, "black")
-                                safeMoves = [move for move in posMoves if move not in blackMoves]
-                                if len(safeMoves) > 0:
-                                    print("Not checkmate, king can move")
-                                
-                                #can you block check
-                                #only works for line pieces (rook, bishop, queen)
-                                if isinstance(checkingPiece, (Rook, Bishop, Queen)):
-                                    checkingPath = []
-                                    xDir = 1 if checkingPiece.position[0] > wKingPos[0] else -1 if checkingPiece.position[0] < wKingPos[0] else 0
-                                    yDir = 1 if checkingPiece.position[1] > wKingPos[1] else -1 if checkingPiece.position[1] < wKingPos[1] else 0
-                                    currX, currY = wKingPos[0] + xDir, wKingPos[1] + yDir
-                                    while (currX, currY) != checkingPiece.position:
-                                        checkingPath.append((currX, currY))
-                                        currX += xDir
-                                        currY += yDir
-                                    
-                                    canBlock = False
-                                    for blockPos in checkingPath:
-                                        if blockPos in whiteMoves:
-                                            canBlock = True
-                                            break
-                                    if canBlock:
-                                        print("Not checkmate, can block check")
-                                
-
-
-                #check if black king is in check
-                for i in range(8):
-                    for j in range(8):
-                        piece = chessBoard[i][j]
-                        if piece is not None and piece.color == "white":
-                            piece.generateMoveList()
-                            if bKingPos in piece.moveList:
-                                print("Black King is in check!")
+                # Check if black king is in check
+                blackInCheck, blackCheckingPiece = isKingInCheck(chessBoard, "black")
+                if blackInCheck:
+                    print("Black King is in check!")
+                    if isCheckmate(chessBoard, "black", blackCheckingPiece):
+                        print("BLACK IS IN CHECKMATE! White wins!")
+                    else:
+                        print("Black is in check but can escape")
 
                 curPiece, select, oldSelect, oldPiece = None, None, None, None
 

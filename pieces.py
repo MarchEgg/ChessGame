@@ -24,28 +24,27 @@ class Pawn(ChessPiece):
         x, y = self.position
         direction = 1 if self.color == "white" else -1
 
+        # Forward move (only if square is empty)
         if self.board[x][y + direction] is None:
             self.moveList.append((x, y + direction))
-
-        if (self.color == "white" and y == 1) or (self.color == "black" and y == 6):
-            self.moveList.append((x, y + 2 * direction))
+            # Double move from starting position (only if both squares are empty)
+            if (self.color == "white" and y == 1) or (self.color == "black" and y == 6):
+                if self.board[x][y + 2 * direction] is None:
+                    self.moveList.append((x, y + 2 * direction))
         
+        # Diagonal captures (only if there's an enemy piece)
         try:
-            if self.board[x - 1][y + direction] is not None:
+            if self.board[x - 1][y + direction] is not None and self.board[x - 1][y + direction].color != self.color:
                 self.moveList.append((x - 1, y + direction))
         except IndexError:
             pass
         try: 
-            if self.board[x + 1][y + direction] is not None:
+            if self.board[x + 1][y + direction] is not None and self.board[x + 1][y + direction].color != self.color:
                 self.moveList.append((x + 1, y + direction))
         except IndexError:
             pass
         
-        ml = self.moveList.copy()
-        for i in ml:
-            if self.board[i[0]][i[1]] is not None:
-                if self.board[i[0]][i[1]].color == self.color:
-                    self.moveList.remove(i)
+        return self.moveList
         
 
     def move(self, newPosition):
@@ -98,6 +97,7 @@ class Rook(ChessPiece):
             if self.board[i[0]][i[1]] is not None:
                 if self.board[i[0]][i[1]].color == self.color:
                     self.moveList.remove(i)
+        return self.moveList
 
     def move(self, newPosition):
         if newPosition in self.moveList:
@@ -148,6 +148,7 @@ class Bishop(ChessPiece):
             if self.board[i[0]][i[1]] is not None:
                 if self.board[i[0]][i[1]].color == self.color:
                     self.moveList.remove(i)
+        return self.moveList
                 
     def move(self, newPosition):
         if newPosition in self.moveList:
@@ -233,6 +234,8 @@ class King(ChessPiece):
         self.surface.fill((150, 75, 0))  # Placeholder for king image
 
     def generateMoveList(self):
+        from utils import isSquareSafeForKing
+        
         self.moveList = []
         x, y = self.position
 
@@ -241,11 +244,30 @@ class King(ChessPiece):
             (x + 1, y), (x - 1, y),
             (x, y + 1), (x, y - 1),
             (x + 1, y + 1), (x + 1, y - 1),
+            (x - 1, y + 1), (x - 1, y - 1),
         ]
         for move in potential_moves:
             if 0 <= move[0] < 8 and 0 <= move[1] < 8:
                 if self.board[move[0]][move[1]] is None or self.board[move[0]][move[1]].color != self.color:
-                    self.moveList.append(move)
+                    # Simulate the move to check if king would be in check
+                    original_piece = self.board[move[0]][move[1]]
+                    original_pos = self.position
+                    
+                    self.board[move[0]][move[1]] = self
+                    self.board[x][y] = None
+                    self.position = move
+                    
+                    # Check if this square is safe
+                    isSafe = isSquareSafeForKing(self.board, self.color, move)
+                    
+                    # Undo the simulated move
+                    self.position = original_pos
+                    self.board[x][y] = self
+                    self.board[move[0]][move[1]] = original_piece
+                    
+                    # Only add move if it doesn't put king in check
+                    if isSafe:
+                        self.moveList.append(move)
 
         return self.moveList
         
