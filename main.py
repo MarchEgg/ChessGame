@@ -3,7 +3,7 @@ from sys import exit
 import time
 
 from pieces import Pawn, Rook, Knight, Bishop, Queen, King
-from utils import checkAllMovesColor, isKingInCheck, isCheckmate
+from utils import checkAllMovesColor, isKingInCheck, isCheckmate, generateLegalMoves
 
 #https://www.youtube.com/watch?v=AY9MnQ4x3zk
 
@@ -69,7 +69,6 @@ while True:
             screen.blit(background[y][x], (x * width / 8, y * height / 8))
             piece = chessBoard[x][y]
             if piece is not None:
-                piece.generateMoveList()
                 screen.blit(piece.surface, (x * width / 8 + piece.surface.get_width() / 2, y * height / 8 + piece.surface.get_height() / 2))
 
     # Handle mouse clicks for selecting and moving pieces
@@ -79,6 +78,11 @@ while True:
         oldPiece = curPiece
         select = (pos[0] // (width // 8), pos[1] // (height // 8))
         curPiece = chessBoard[select[0]][select[1]]
+        if curPiece is not None:
+            if (turn == 0 and curPiece.color == "white") or (turn == 1 and curPiece.color == "black"):
+                generateLegalMoves(curPiece)
+            else:
+                curPiece.moveList = []  # not your turn -> show nothing
         time.sleep(0.2)  # Simple debounce to avoid multiple selections
         
     print("1", select)
@@ -87,6 +91,7 @@ while True:
     print("2 color", oldPiece.color if oldPiece is not None else None)
     
     if(oldPiece is not None): # check if last selected square had a piece
+        generateLegalMoves(oldPiece)
         if(select in oldPiece.moveList): # check if new selected square is a valid move
             if(turn == 0 and oldPiece.color == "white" or turn == 1 and oldPiece.color == "black"): # check if it's the correct player's turn
                 turn = 1 - turn # switch turns

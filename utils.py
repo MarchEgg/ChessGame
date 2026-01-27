@@ -177,3 +177,56 @@ def isCheckmate(board, kingColor, checkingPiece):
                                 return False  # Can escape by blocking
     
     return True  # It's checkmate
+
+def _findKingPos(board, kingColor):
+    from pieces import King
+    for x in range(8):
+        for y in range(8):
+            p = board[x][y]
+            if p is not None and isinstance(p, King) and p.color == kingColor:
+                return (x, y)
+    return None
+
+
+def generateLegalMoves(piece):
+    """
+    Returns a filtered move list for `piece` such that none of the moves
+    leave that side's king in check. This automatically prevents pinned pieces
+    from moving illegally.
+    """
+    from pieces import King
+    from utils import isKingInCheck  # safe even within same module in your setup
+
+    # Pseudo-legal moves from the piece's own movement rules
+    pseudo = piece.generateMoveList() or []
+    if not pseudo:
+        piece.moveList = []
+        return []
+
+    board = piece.board
+    color = piece.color
+
+    legal = []
+    from_x, from_y = piece.position
+
+    for (to_x, to_y) in list(pseudo):
+        captured = board[to_x][to_y]
+
+        # --- simulate ---
+        board[from_x][from_y] = None
+        board[to_x][to_y] = piece
+        old_pos = piece.position
+        piece.position = (to_x, to_y)
+
+        in_check, _ = isKingInCheck(board, color)
+
+        # --- undo ---
+        piece.position = old_pos
+        board[from_x][from_y] = piece
+        board[to_x][to_y] = captured
+
+        if not in_check:
+            legal.append((to_x, to_y))
+
+    piece.moveList = legal
+    return legal
