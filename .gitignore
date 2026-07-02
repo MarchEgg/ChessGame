@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pio/
+.DS_Store
+
+# Stockfish engine distribution (large binary, download separately)
+software/stockfish/

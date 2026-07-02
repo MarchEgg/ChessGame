@@ -3,8 +3,10 @@ from sys import exit
 import time
 
 from pieces import Pawn, Rook, Knight, Bishop, Queen, King
-from utils import checkAllMovesColor, isKingInCheck, isCheckmate, generateLegalMoves
-
+from utils import (
+    checkAllMovesColor, isKingInCheck, isCheckmate, generateLegalMoves,
+    board_to_fen, get_stockfish_top_moves, uci_to_coords
+)
 #https://www.youtube.com/watch?v=AY9MnQ4x3zk
 
 
@@ -22,6 +24,15 @@ chessBoard = [[None for _ in range(8)] for _ in range(8)]
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Chess Game")
 clock = pygame.time.Clock()
+
+
+STOCKFISH_PATH = "stockfish/stockfish-macos-m1-apple-silicon"  # or "./stockfish" or "stockfish.exe" (set this correctly!)
+
+hint_moves = []          # list of UCI strings like ["e2e4", "g1f3", ...]
+hint_coords = []         # list of ((fx,fy),(tx,ty)) coords to highlight
+hint_text = ""           # rendered text content
+hint_font = pygame.font.SysFont(None, 30)
+
 
 
 for i in range(8):
@@ -62,6 +73,32 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+            if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_h and (not game_over):
+            fen = board_to_fen(chessBoard, turn)
+            try:
+                hint_moves = get_stockfish_top_moves(
+                    fen,
+                    STOCKFISH_PATH,
+                    depth=15,
+                    multipv=3
+                )
+            except Exception as e:
+                hint_moves = []
+                hint_text = f"Stockfish error: {e}"
+                hint_coords = []
+            else:
+                if hint_moves:
+                    hint_text = "Top moves: " + ", ".join(hint_moves)
+                    hint_coords = []
+                    for mv in hint_moves:
+                        c = uci_to_coords(mv)
+                        if c:
+                            hint_coords.append(c)
+                else:
+                    hint_text = "No hint moves returned."
+                    hint_coords = []
+
 
     # Draw chessboard and pieces
     for x in range(8):
