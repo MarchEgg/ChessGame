@@ -9,8 +9,8 @@ program over a simple serial protocol.
 ## Demo
 
 
+https://github.com/user-attachments/assets/df5a50ba-8b1d-4e79-a26c-6a91293f64aa
 
-https://github.com/user-attachments/assets/797a81f8-4a59-4762-82a1-63dfc64a0c94
 
 
 
