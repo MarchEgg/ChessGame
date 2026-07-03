@@ -8,26 +8,11 @@ program over a simple serial protocol.
 
 ## Demo
 
-<!--
-  ADD YOUR VIDEO HERE.
 
-  Easiest option (GitHub): open this README in the GitHub web editor (or a PR/
-  issue), then drag-and-drop your video file (.mp4/.mov, < 100 MB) into the text
-  area. GitHub uploads it and pastes a URL like:
 
-      https://github.com/user-attachments/assets/xxxxxxxx-....mp4
+https://github.com/user-attachments/assets/797a81f8-4a59-4762-82a1-63dfc64a0c94
 
-  Paste that URL on its own line below (replacing the placeholder) and GitHub
-  renders an inline player.
 
-  Alternatives:
-    - Upload to YouTube and use a thumbnail link:
-        [![Demo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://youtu.be/VIDEO_ID)
-    - Commit the file to the repo (only if small) and reference it:
-        https://raw.githubusercontent.com/MarchEgg/ChessGame/main/docs/demo.mp4
--->
-
->  **Demo videocan you commit and push with -m"added readme"** 
 
 ## Project layout
 
